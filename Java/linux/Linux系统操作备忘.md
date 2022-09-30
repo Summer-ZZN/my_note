@@ -1,10 +1,16 @@
 # Linux系统操作备忘
 
-## 一、设置yum源
+
+
+## 软件安装
+
+
+
+### 一、设置yum源
 
 1、CentOS-6 的操作系统， yum镜像仓库在 2020 年的时候停止对其的维护，导致不能正常使用。
 
-### 备份
+#### 备份
 
 ```sh
 mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
@@ -12,7 +18,7 @@ mv /etc/yum.repos.d/CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo.backup
 mv /etc/yum.repos.d/epel.repo /etc/yum.repos.d/epel.repo.backup
 ```
 
-### 下载
+#### 下载
 
 ```sh
 wget -O /etc/yum.repos.d/CentOS-Base.repo https://gitee.com/yeungchie/CentOS6_yum/raw/master/CentOS6-Base.repo
@@ -20,7 +26,7 @@ wget -O /etc/yum.repos.d/CentOS-Base.repo https://gitee.com/yeungchie/CentOS6_yu
 wget -O /etc/yum.repos.d/epel.repo https://gitee.com/yeungchie/CentOS6_yum/raw/master/epel6.repo
 ```
 
-### 更新
+#### 更新
 
 ```sh
 yum clean all
@@ -36,7 +42,7 @@ yum update -y
 
 
 
-## 二、设置pg_dump工具
+### 二、设置pg_dump工具
 
 在使用pg_dump工具对数据库进行备份的时候，会提示pg_dump版本和数据库版本不一致；
 
@@ -68,9 +74,9 @@ pg_dump --username=root --host=192.168.1.xxx --port=5432 --format=plain --file=[
 
 
 
-## 三、centos7  开机设置应用自启动
+### 三、centos7  开机设置应用自启动
 
-### 1、方式一
+#### 1、方式一
 
 采用 rc.local ;相关启动命令在/etc/rc.d/rc.local 这个文件中添加
 
@@ -96,11 +102,11 @@ export JRE_HOME=${JAVA_HOME}/jre
 /data/devHome/protection-4.0/apache-tomcat-video-8.5.32-1170/bin/startup.sh
 ```
 
-### 2、方式二
+#### 2、方式二
 
 ​        自己写脚本,配置各个服务自己开机启动
 
-#### ①、nginx脚本
+##### ①、nginx脚本
 
 创建文件 nginx.service ,将下列脚本粘贴到该文本；(根据实际安装目录修改脚本中的路径)
 
@@ -157,7 +163,7 @@ Warning: nginx.service changed on disk. Run 'systemctl daemon-reload' to reload 
 
 
 
-#### ②、redis脚本
+##### ②、redis脚本
 
 创建文件 redis ,将下列脚本粘贴到该文本；(根据实际安装目录修改脚本中的路径)
 
@@ -241,7 +247,7 @@ chkconfig redis on
 
 
 
-## 四、JDK的安装
+### 四、JDK的安装
 
 1、查询自带的JDK版本
 
@@ -314,7 +320,7 @@ source /etc/profile
 
 
 
-## 五、nginx的安装
+### 五、nginx的安装
 
 1、下载nginx包
 
@@ -428,7 +434,7 @@ cd /usr/local/nginx/sbin
 
 
 
-## 六、redis安装
+### 六、redis安装
 
 1、下载
 
@@ -491,7 +497,7 @@ netstat -lanp | grep 6379
 
 
 
-## 七、安装postgreSql-10
+### 七、安装postgreSql-10
 
 postgreSql 官方已经不再维护 centOS-6 操作系统
 
@@ -593,7 +599,7 @@ vim /var/lib/pgsql/10/data/postgresql.conf
 
 
 
-## 八、安装 postGIS-2.3 扩展库
+### 八、安装 postGIS-2.3 扩展库
 
 ```sh
 # 移动至目录
@@ -612,3 +618,151 @@ su - postgres
 create extension postgis;
 ```
 
+
+
+------
+
+
+
+## 系统操作
+
+### 一、防火墙设置
+
+1. CentOS 7
+
+   因为CentOS7 里面是用 firewalld 来管理防火墙的
+   命令语法：firewall-cmd [--zone=zone] 动作 [--permanent] 
+   注：如果不指定--zone选项，则为当前所在的默认区域，--permanent选项为是否将改动写入到区域配置文件中
+
+   例:
+
+   ```sh
+   添加80端口为允许：
+   （--permanent 没有此参数重启后失效）
+   #firewall-cmd --zone=public --add-port=443/tcp --permanent
+   添加范围例外端口 如 5000-10000：
+   #firewall-cmd --zone=public --add-port=1088-1120/tcp --permanent 
+   添加完成后立刻生效：
+   重新载入
+   #firewall-cmd --reload
+   查看
+   #firewall-cmd --zone=public --query-port=443/tcp
+   删除
+   #firewall-cmd --zone=public --remove-port=80/tcp --permanent
+   ```
+
+    
+
+2. CentOS 6
+
+```sh
+1. 开放端口命令： 
+#/sbin/iptables -I INPUT -p tcp --dport 1209 -j ACCEPT
+2.保存：
+#/etc/rc.d/init.d/iptables save
+3.重启服务：
+#/etc/init.d/iptables restart
+4.查看端口是否开放：
+#/sbin/iptables -L -n
+```
+
+
+
+### 二、文件权限
+
+```sh
+# chmod u+x *.sh
+```
+
+
+
+### 三、查看服务器详情
+
+```sh
+1、查看系统运行情况
+# top
+
+2、查看系统内存
+# free -h
+
+3、查看硬盘使用情况
+# df -h
+
+4、查看文件夹大小
+# ls-lh
+
+5、查看CPU个数
+# cat /proc/cpuinfo | grep "physical id" | uniq | wc -l
+
+6、查看CPU核数
+# cat /proc/cpuinfo | grep "cpu cores" | uniq
+
+7、 查看内存总数
+# cat /proc/meminfo | grep MemTotal
+MemTotal: 32941268 kB //内存32G
+
+8、 查看硬盘大小
+# fdisk -l | grep Disk
+Disk /dev/cciss/c0d0: 146.7 GB, 146778685440 bytes
+总结：硬盘大小146.7G，即厂商标称的160G
+
+9、 显示正在使用的内核版本 
+# uname -r
+
+10、显示哪些swap被使用
+# cat /proc/swaps
+
+11、显示系统日期
+# date 
+
+12、显示工作路径 
+# pwd
+
+13、显示文件和目录的详细资料 
+# ls -l
+
+14、显示隐藏文件 
+# ls -a 
+```
+
+
+
+### 四、文件的搜索
+
+```sh
+1、从 '/' 开始进入根文件系统搜索文件和目录
+# find / -name file1
+2、在目录 '/ home/user1' 中搜索带有'.bin' 结尾的文件 
+# find /home/user1 -name \*.bin 
+```
+
+
+
+### 五、挂载一个文件系统
+
+```sh
+1、挂载一个叫做hda2的盘 - 确定目录 '/ mnt/hda2' 已经存在 
+# mount /dev/hda2 /mnt/hda2
+2、卸载一个叫做hda2的盘 - 先从挂载点 '/ mnt/hda2' 退出 
+# umount /dev/hda2
+3、当设备繁忙时强制卸载 
+# fuser -km /mnt/hda2
+4、运行卸载操作而不写入 /etc/mtab 文件- 当文件为只读或当磁盘写满时非常有用 
+# umount -n /mnt/hda2
+5、挂载一个软盘 
+# mount /dev/fd0 /mnt/floppy
+6、挂载一个cdrom或dvdrom 
+# mount /dev/cdrom /mnt/cdrom
+7、挂载一个cdrw或dvdrom 
+# mount /dev/hdc /mnt/cdrecorder
+8、挂载一个cdrw或dvdrom 
+# mount /dev/hdb /mnt/cdrecorder
+9、挂载一个文件或ISO镜像文件 
+# mount -o loop file.iso /mnt/cdrom
+10、挂载一个Windows FAT32文件系统 
+# mount -t vfat /dev/hda5 /mnt/hda5
+11、挂载一个usb 捷盘或闪存设备 
+# mount /dev/sda1 /mnt/usbdisk
+12、挂载一个windows网络共享 
+# mount -t smbfs -o username=user,password=pass //WinClient/share /mnt/share
+```
